@@ -1,0 +1,35 @@
+csharp
+using Xunit;
+public class AgeClassifierTests
+{
+    [Theory]
+    [InlineData(-1, "Ошибка")]
+    [InlineData(0, "Младенец")]
+    [InlineData(2, "Младенец")]
+    [InlineData(3, "Ребёнок")]
+    [InlineData(11, "Ребёнок")]
+    [InlineData(12, "Подросток")]
+    [InlineData(17, "Подросток")]
+    [InlineData(18, "Взрослый")]
+    [InlineData(59, "Взрослый")]
+    [InlineData(60, "Пожилой")]
+    [InlineData(100, "Пожилой")]
+    [InlineData(150, "Некорректный возраст")]
+    public void Classify_ValidInputs_ReturnsCorrectCategory(int age, string expected)
+    {
+        // Act
+        string result = AgeClassifier.Classify(age);
+        // Assert
+        Assert.Equal(expected, result);
+    }
+    [Fact]
+    public void Factorial_Zero_ReturnsOne()
+    {
+        Assert.Equal(1, LoopAlgorithms.Factorial(0));
+    }
+    [Fact]
+    public void Factorial_Negative_ThrowsException()
+    {
+        Assert.Throws<ArgumentException>(() => LoopAlgorithms.Factorial(-5));
+    }
+}
