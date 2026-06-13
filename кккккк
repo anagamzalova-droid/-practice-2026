@@ -1,0 +1,34 @@
+csharp
+// Код с дублированием и магическими числами
+double a = 0;
+for(int i=0;i<listBox1.Items.Count;i++) {
+    a = a + Convert.ToDouble(listBox1.Items[i]);
+}
+double b = a / listBox1.Items.Count;
+textBox1.Text = b.ToString();
+// ... такой же код в другом месте
+После рефакторинга:
+
+csharp
+public static class StatisticsHelper
+{
+    private const int DEFAULT_PRECISION = 2;
+    
+    public static double CalculateAverage(IEnumerable<double> values)
+    {
+        if (values == null || !values.Any())
+            throw new ArgumentException("Коллекция не должна быть пустой");
+            
+        return values.Average();
+    }
+    
+    public static string FormatWithPrecision(double value, int precision = DEFAULT_PRECISION)
+    {
+        return value.ToString($"F{precision}");
+    }
+}
+
+// Использование:
+var scores = listBoxScores.Items.Cast<double>();
+double avg = StatisticsHelper.CalculateAverage(scores);
+textBoxAverage.Text = StatisticsHelper.FormatWithPrecision(avg);
