@@ -1,0 +1,126 @@
+csharp
+using SQLite;
+namespace MobilePractice.Models;
+[Table("calculations")]
+public class CalculationResult
+{
+    [PrimaryKey, AutoIncrement]
+    public int Id { get; set; }
+        [Column("input_value")]
+    public double InputValue { get; set; }
+    [Column("result_value")]
+    public double ResultValue { get; set; }
+    [Column("operation_type")]
+    public string OperationType { get; set; }
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+}
+Сервис базы данных:
+csharp
+using SQLite;
+namespace MobilePractice.Services;
+public class DatabaseService
+{
+    private SQLiteAsyncConnection _database;
+    public DatabaseService()
+    {
+        InitializeAsync();
+    }
+    private async Task InitializeAsync()
+    {
+        var dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "practice_mobile.db3");
+        _database = new SQLiteAsyncConnection(dbPath);
+        await _database.CreateTableAsync<CalculationResult>();
+    }
+        public async Task<List<CalculationResult>> GetAllResultsAsync()
+    {
+        return await _database.Table<CalculationResult>().ToListAsync();
+    }
+    public async Task<int> SaveResultAsync(CalculationResult result)
+    {
+        return await _database.InsertAsync(result);
+    }
+    public async Task<int> DeleteResultAsync(int id)
+    {
+        return await _database.DeleteAsync<CalculationResult>(id);
+    }
+}
+Страница MainPage.xaml:
+xml
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MobilePractice.MainPage">
+    <VerticalStackLayout Spacing="15" Padding="20">
+        <Entry x:Name="txtInput" 
+               Placeholder="Введите число"
+               Keyboard="Numeric"
+               FontSize="20"/>
+        <Picker x:Name="pickerOperation" Title="Выберите операцию">
+            <Picker.Items>
+                <x:String>Квадрат</x:String>
+                <x:String>Корень</x:String>
+                <x:String>Синус</x:String>
+            </Picker.Items>
+        </Picker>
+        <Button x:Name="btnCalculate" 
+                Text="Вычислить" 
+                Clicked="OnCalculateClicked"
+                BackgroundColor="#007AFF"
+                TextColor="White"/>
+        <Label x:Name="lblResult" 
+               FontSize="18"
+               HorizontalOptions="Center"/>
+        <Button Text="История" 
+                Clicked="OnHistoryClicked"
+                BackgroundColor="#34C759"
+                TextColor="White"/>
+    </VerticalStackLayout>
+</ContentPage>
+Код страницы (MainPage.xaml.cs):
+csharp
+public partial class MainPage : ContentPage
+{
+    private readonly DatabaseService _dbService;
+    public MainPage()
+    {
+        InitializeComponent();
+        _dbService = new DatabaseService();
+    }
+    private async void OnCalculateClicked(object sender, EventArgs e)
+    {
+        if (!double.TryParse(txtInput.Text, out double input))
+        {
+            await DisplayAlert("Ошибка", "Введите корректное число", "OK");
+            return;
+        }
+        double result = 0;
+        string operation = pickerOperation.SelectedItem?.ToString() ?? "Квадрат";
+        switch (operation)
+        {
+            case "Квадрат":
+                result = input * input;
+                break;
+            case "Корень":
+                result = Math.Sqrt(input);
+                break;
+            case "Синус":
+                result = Math.Sin(input * Math.PI / 180);
+                break;
+        }
+        lblResult.Text = $"Результат: {result:F4}";
+        // Сохранение в БД
+        var calcResult = new CalculationResult
+        {
+            InputValue = input,
+            ResultValue = result,
+            OperationType = operation
+        };
+        await _dbService.SaveResultAsync(calcResult);
+    }
+    
+    private async void OnHistoryClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new ResultsPage(_dbService));
+    }
+}
