@@ -1,0 +1,49 @@
+csharp
+/// <summary>
+/// Вычисляет среднее арифметическое коллекции чисел
+/// </summary>
+/// <param name="values">Коллекция чисел с плавающей точкой</param>
+/// <returns>Среднее значение</returns>
+/// <exception cref="ArgumentException">Выбрасывается, если коллекция пуста или null</exception>
+/// <example>
+/// <code>
+/// double[] scores = { 85.5, 90.0, 78.3 };
+/// double avg = StatisticsHelper.CalculateAverage(scores);
+/// Console.WriteLine(avg); // 84.6
+/// </code>
+/// </example>
+public static double CalculateAverage(IEnumerable<double> values)
+{
+    // реализация
+}
+Диаграмма базы данных (PlantUML):
+text
+@startuml
+!theme plain
+entity Users {
+  * Id : int <<PK>>
+  --
+  * Username : string
+  * Email : string
+  * PasswordHash : string
+  CreatedAt : datetime
+  IsActive : boolean
+}
+entity TestResults {
+  * Id : int <<PK>>
+  --
+  * UserId : int <<FK>>
+  * TestName : string
+  Score : int
+  MaxScore : int
+  TestDate : datetime
+}
+entity Logs {
+  * Id : int <<PK>>
+  --
+  EventType : string
+  EventMessage : string
+  EventTime : datetime
+}
+Users ||--o{ TestResults
+@enduml
