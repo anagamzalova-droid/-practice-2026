@@ -1,0 +1,43 @@
+cpp
+extern "C" {
+    __declspec(dllexport) double FastDotProduct(double* a, double* b, int size) {
+        double sum = 0.0;
+        for (int i = 0; i < size; i++) {
+            sum += a[i] * b[i];
+        }
+        return sum;
+    }
+    
+    __declspec(dllexport) void VectorAdd(double* a, double* b, double* result, int size) {
+        for (int i = 0; i < size; i++) {
+            result[i] = a[i] + b[i];
+        }
+    }
+}
+Вызов из C#:
+
+csharp
+using System.Runtime.InteropServices;
+
+public static class NativeMath
+{
+    [DllImport("NativeLib.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern double FastDotProduct(double[] a, double[] b, int size);
+    
+    [DllImport("NativeLib.dll", CallingConvention = CallingConvention.Cdecl)]
+    private static extern void VectorAdd(double[] a, double[] b, double[] result, int size);
+    
+    public static double DotProduct(double[] a, double[] b)
+    {
+        if (a.Length != b.Length)
+            throw new ArgumentException("Vectors must have same length");
+        return FastDotProduct(a, b, a.Length);
+    }
+    
+    public static double[] AddVectors(double[] a, double[] b)
+    {
+        var result = new double[a.Length];
+        VectorAdd(a, b, result, a.Length);
+        return result;
+    }
+}
