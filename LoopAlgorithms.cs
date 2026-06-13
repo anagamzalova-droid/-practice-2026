@@ -47,3 +47,17 @@ public static class LoopAlgorithms
         return primes;
     }
 }
+csharp
+private async void btnCalculate_Click(object sender, EventArgs e)
+{
+    progressBar1.Maximum = 100;
+    for (int i = 1; i <= 100; i++)
+    {
+        await Task.Delay(10);
+        progressBar1.Value = i;
+        lblProgress.Text = $"Вычисление... {i}%";
+    }
+    lblResult.Text = $"Факториал 10 = {LoopAlgorithms.Factorial(10)}";
+}
+
+
