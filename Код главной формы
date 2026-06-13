@@ -1,0 +1,36 @@
+csharp
+public partial class Form1 : Form
+{
+    private DataGridView dgvStudents;
+    private Button btnCalculate;
+    private Label lblAverage;
+    private List<Student> students = new List<Student>();
+    public Form1()
+    {
+        InitializeComponent();
+        LoadData();
+    }
+    private void LoadData()
+    {
+        // Загрузка из БД (будет реализовано в п.2)
+        students.Add(new Student { Name = "Иванов И.И.", Score = 85 });
+        students.Add(new Student { Name = "Петрова А.С.", Score = 92 });
+        dgvStudents.DataSource = students;
+    }
+    private void btnCalculate_Click(object sender, EventArgs e)
+    {
+        double avg = students.Average(s => s.Score);
+        lblAverage.Text = $"Средний балл: {avg:F2}";
+        // Событие логирования
+        LogToFile($"Расчёт выполнен: {DateTime.Now}");
+    }
+    private void LogToFile(string message)
+    {
+        File.AppendAllText("log.txt", message + Environment.NewLine);
+    }
+}
+public class Student
+{
+    public string Name { get; set; }
+    public int Score { get; set; }
+}
