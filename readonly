@@ -1,0 +1,35 @@
+csharp
+using Microsoft.Data.Sqlite;
+using Dapper;
+public class DatabaseHelper
+{
+    private readonly string _connectionString;
+    public DatabaseHelper(string dbPath = "practice.db")
+    {
+        _connectionString = $"Data Source={dbPath}";
+        InitializeDatabase();
+    }
+    private void InitializeDatabase()
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        connection.Open();
+        var sql = File.ReadAllText("test_database.sql");
+        connection.Execute(sql);
+    }
+    public List<TestResult> GetTestResultsByUser(string username)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        var sql = @"
+            SELECT tr.* FROM TestResults tr
+            JOIN Users u ON tr.UserId = u.Id
+            WHERE u.Username = @username";
+        return connection.Query<TestResult>(sql, new { username }).ToList();
+    }
+    
+    public void LogEvent(string eventType, string message)
+    {
+        using var connection = new SqliteConnection(_connectionString);
+        var sql = "INSERT INTO Logs (EventType, EventMessage) VALUES (@type, @msg)";
+        connection.Execute(sql, new { type = eventType, msg = message });
+    }
+}
